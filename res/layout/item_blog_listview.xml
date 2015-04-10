@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:background="@drawable/background_card"
+    android:paddingBottom="14dp" >
+
+    <TextView
+        android:id="@+id/blog_titleTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:fontFamily="RobotoSlab-Regular.ttf"
+        android:textSize="22sp" />
+
+    <TextView
+        android:id="@+id/blog_contentTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/blog_titleTextView"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:ellipsize="end"
+        android:maxLines="10"
+        android:textColor="#737373"
+        android:textSize="14sp" />
+
+    <ImageView
+        android:id="@+id/blogger_iconImageView"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_below="@id/blog_contentTextView"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:id="@+id/blog_authorTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/blogger_iconImageView"
+        android:layout_marginLeft="8dp"
+        android:layout_toRightOf="@id/blogger_iconImageView" />
+
+    <TextView
+        android:id="@+id/blog_ago_TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/blogger_iconImageView"
+        android:layout_alignLeft="@id/blog_authorTextView"
+        android:textColor="#aaa"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/blog_readNum_TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/blogger_iconImageView"
+        android:layout_marginLeft="8dp"
+        android:layout_toRightOf="@id/blog_ago_TextView"
+        android:textColor="#aaa"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/blog_commentNum_TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/blogger_iconImageView"
+        android:layout_marginLeft="8dp"
+        android:layout_toRightOf="@id/blog_readNum_TextView"
+        android:textColor="#aaa"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/blog_typeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+         android:layout_alignTop="@id/blogger_iconImageView"
+        android:layout_alignParentRight="true"
+        android:padding="8dp"
+        android:textColor="#aaa" />
+
+</RelativeLayout>

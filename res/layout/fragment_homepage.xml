@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.example.mycsdn"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <com.custom.MyListView
+        android:id="@+id/listview_homeblogs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="16dp"
+        android:paddingBottom="16dp"
+        android:scrollbars="none" />
+
+    <com.custom.CustomFAB
+        android:id="@+id/menu_customFAB"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="45dp"
+        android:layout_marginRight="20dp"
+        android:src="@android:drawable/ic_input_add"
+        android:tint="@android:color/white"
+        custom:bg_color="@color/red_light" />
+
+    <ProgressBar
+        android:id="@+id/ProgressBar_homepage"
+        style="@style/customProgressBar"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true" />
+
+</RelativeLayout>
