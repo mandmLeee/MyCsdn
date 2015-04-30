@@ -3,6 +3,7 @@ package com.example.mycsdn;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import pl.droidsonroids.gif.GifImageView;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;

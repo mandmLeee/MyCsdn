@@ -42,13 +42,13 @@ public class HtmlFetchr {
 
 		URL url = new URL(urlSpec);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		// 这里强制转换，是因为下面要用到HttpURLConnection.getInputStream
+		ByteArrayOutputStream out = null;
+		InputStream in = null;
 		try {
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			InputStream in = conn.getInputStream();
+			out = new ByteArrayOutputStream();
+			in = conn.getInputStream();
 			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-				// 连接不成功
-				Log.i(TAG, "连接不成功");
+				// Log.i(TAG, "连接不成功");
 				return null;
 			}
 
@@ -61,6 +61,12 @@ public class HtmlFetchr {
 			return out.toByteArray();
 		} finally {
 			conn.disconnect();
+			if (out != null) {
+				out.close();
+			}
+			if (in != null) {
+				in.close();
+			}
 		}
 
 	}
