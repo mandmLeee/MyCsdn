@@ -33,31 +33,31 @@ import com.utils.ThumbnailDownloader;
 public class MainActivity extends FragmentActivity implements
 		android.view.View.OnClickListener {
 	protected static final String TAG = "MainActivity";
-	private PagerSlidingTabStrip mTabs; // »¬¶¯Tabs
-	private ViewPager mViewPager; // ´æ·ÅFragmentµÄÈİÆ÷
-	private DisplayMetrics mDm; // µ±Ç°ÆÁÄ»µÄÃÜ¶È
-	private MyPagerAdapter mAdapter; // ÉèÅäÆ÷
+	private PagerSlidingTabStrip mTabs; // æ»‘åŠ¨Tabs
+	private ViewPager mViewPager; // å­˜æ”¾Fragmentçš„å®¹å™¨
+	private DisplayMetrics mDm; // å½“å‰å±å¹•çš„å¯†åº¦
+	private MyPagerAdapter mAdapter; // è®¾é…å™¨
 
-	private BlogColumnsFragment mBCSFragment; // ËùÓĞ×¨À¸
-	private HomePageFragment mHPFragment; // Ê×Ò³
-	private HotBlogsFragment mHBFragment; // ÈÈÃÅÎÄÕÂ
-	private MyBlogsFragment mMBFraggment; // ÎÒµÄ²©¿Í
-	public static ThumbnailDownloader<GifImageView> mThumbnailDownloader; // Í¼Æ¬ÏÂÔØÆ÷
+	private BlogColumnsFragment mBCSFragment; // æ‰€æœ‰ä¸“æ 
+	private HomePageFragment mHPFragment; // é¦–é¡µ
+	private HotBlogsFragment mHBFragment; // çƒ­é—¨æ–‡ç« 
+	private MyBlogsFragment mMBFraggment; // æˆ‘çš„åšå®¢
+	public static ThumbnailDownloader<GifImageView> mThumbnailDownloader; // å›¾ç‰‡ä¸‹è½½å™¨
 
 	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		// ×Ô¶¨ÒåActionBars
+		// è‡ªå®šä¹‰ActionBars
 		TextView localTextView = (TextView) findViewById(getResources()
 				.getIdentifier("action_bar_title", "id", "android"));
-		// »ñÈ¡ActionBarÖĞµÄTitleTextView
-		// µÚÒ»¸ö²ÎÊıÎªIDÃû£¬µÚ¶ş¸öÎª×ÊÔ´ÊôĞÔÊÇID»òÕßÊÇDrawable£¬µÚÈı¸öÎª°üÃû¡£
+		// è·å–ActionBarä¸­çš„TitleTextView
+		// ç¬¬ä¸€ä¸ªå‚æ•°ä¸ºIDåï¼Œç¬¬äºŒä¸ªä¸ºèµ„æºå±æ€§æ˜¯IDæˆ–è€…æ˜¯Drawableï¼Œç¬¬ä¸‰ä¸ªä¸ºåŒ…åã€‚
 		localTextView.setTextSize(23.0F);
 		localTextView.setTextColor(Color.parseColor("#ffffff"));
 
-		// ¿ªÆôÏìÓ¦ÏÂÔØÍ¼Æ¬ÏûÏ¢µÄÏß³Ì
+		// å¼€å¯å“åº”ä¸‹è½½å›¾ç‰‡æ¶ˆæ¯çš„çº¿ç¨‹
 		mThumbnailDownloader = new ThumbnailDownloader<GifImageView>(
 				new Handler());
 		mThumbnailDownloader
@@ -66,11 +66,12 @@ public class MainActivity extends FragmentActivity implements
 					public void onThumbnailDownloaded(GifImageView imageView,
 							Bitmap thumbnail, String url) {
 						if (imageView.getTag().equals(url)) {
-							// Log.i(TAG, "tagÓëurl¶ÔÓ¦");
-							imageView.setImageBitmap(thumbnail); // ¸üĞÂUI£¬ÉÏÍ¼
+							// Log.i(TAG, "tagä¸urlå¯¹åº”");
+							imageView.setImageBitmap(thumbnail); // æ›´æ–°UIï¼Œä¸Šå›¾
 						} else {
-							// Log.i(TAG, "tagÓëurl²»¶ÔÓ¦");
+							// Log.i(TAG, "tagä¸urlä¸å¯¹åº”");
 						}
+						thumbnail = null;
 					}
 				});
 		mThumbnailDownloader
@@ -81,59 +82,59 @@ public class MainActivity extends FragmentActivity implements
 							GifImageView imageView, GifDrawable thumbnail,
 							String url) {
 						if (imageView.getTag().equals(url)) {
-							// Log.i(TAG, "tagÓëurl¶ÔÓ¦");
-							imageView.setImageDrawable(thumbnail); // ¸üĞÂUI£¬ÉÏÍ¼
+							// Log.i(TAG, "tagä¸urlå¯¹åº”");
+							imageView.setImageDrawable(thumbnail); // æ›´æ–°UIï¼Œä¸Šå›¾
 						} else {
-							// Log.i(TAG, "tagÓëurl²»¶ÔÓ¦");
+							// Log.i(TAG, "tagä¸urlä¸å¯¹åº”");
 						}
 					}
 
 				});
 
 		mThumbnailDownloader.start();
-		mThumbnailDownloader.getLooper(); // ±ØĞëÒªÔÚstartÖ®ºó
+		mThumbnailDownloader.getLooper(); // å¿…é¡»è¦åœ¨startä¹‹å
 		// -----------------------------------
 
-		mDm = getResources().getDisplayMetrics(); // »ñÈ¡µ±Ç°ÆÁÄ»µÄÃÜ¶È
+		mDm = getResources().getDisplayMetrics(); // è·å–å½“å‰å±å¹•çš„å¯†åº¦
 
 		mTabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mAdapter = new MyPagerAdapter(getSupportFragmentManager());
-		mViewPager.setAdapter(mAdapter); // ¸øViewPagerÉèÅäÆ÷
-		mViewPager.setOffscreenPageLimit(3); // ÉèÖÃviewPager»º´æ3¸öÒ³Ãæ
-		mTabs.setViewPager(mViewPager); // ½«tabsºÍviewPagerÁªÏµÆğÀ´
-		setTabsValue(); // ³õÊ¼»¯tabsÊôĞÔ
+		mViewPager.setAdapter(mAdapter); // ç»™ViewPagerè®¾é…å™¨
+		mViewPager.setOffscreenPageLimit(3); // è®¾ç½®viewPagerç¼“å­˜3ä¸ªé¡µé¢
+		mTabs.setViewPager(mViewPager); // å°†tabså’ŒviewPagerè”ç³»èµ·æ¥
+		setTabsValue(); // åˆå§‹åŒ–tabså±æ€§
 	}
 
 	/**
-	 * ¶ÔPagerSlidingTabStripµÄ¸÷ÏîÊôĞÔ½øĞĞ¸³Öµ¡£
+	 * å¯¹PagerSlidingTabStripçš„å„é¡¹å±æ€§è¿›è¡Œèµ‹å€¼ã€‚
 	 */
 	private void setTabsValue() {
-		// ÉèÖÃTabÊÇ×Ô¶¯Ìî³äÂúÆÁÄ»µÄ
+		// è®¾ç½®Tabæ˜¯è‡ªåŠ¨å¡«å……æ»¡å±å¹•çš„
 		mTabs.setShouldExpand(true);
-		// ÉèÖÃTabµÄ·Ö¸îÏßÊÇÍ¸Ã÷µÄ
+		// è®¾ç½®Tabçš„åˆ†å‰²çº¿æ˜¯é€æ˜çš„
 		mTabs.setDividerColor(Color.TRANSPARENT);
-		// ÉèÖÃTabµ×²¿ÏßµÄ¸ß¶È
+		// è®¾ç½®Tabåº•éƒ¨çº¿çš„é«˜åº¦
 		mTabs.setUnderlineHeight((int) TypedValue.applyDimension(
 				TypedValue.COMPLEX_UNIT_DIP, 1, mDm));
-		// ÉèÖÃTab »¬¶¯ÌõµÄ¸ß¶È
+		// è®¾ç½®Tab æ»‘åŠ¨æ¡çš„é«˜åº¦
 		mTabs.setIndicatorHeight((int) TypedValue.applyDimension(
 				TypedValue.COMPLEX_UNIT_DIP, 4, mDm));
-		// ÉèÖÃTab±êÌâÎÄ×ÖµÄ´óĞ¡
+		// è®¾ç½®Tabæ ‡é¢˜æ–‡å­—çš„å¤§å°
 		mTabs.setTextSize((int) TypedValue.applyDimension(
 				TypedValue.COMPLEX_UNIT_SP, 16, mDm));
-		// ÉèÖÃTab »¬¶¯ÌõµÄÑÕÉ«
+		// è®¾ç½®Tab æ»‘åŠ¨æ¡çš„é¢œè‰²
 		mTabs.setIndicatorColor(Color.parseColor("#cc0000"));
-		// ÉèÖÃÑ¡ÖĞTabÎÄ×ÖµÄÑÕÉ« (ÕâÊÇÎÒ×Ô¶¨ÒåµÄÒ»¸ö·½·¨)
+		// è®¾ç½®é€‰ä¸­Tabæ–‡å­—çš„é¢œè‰² (è¿™æ˜¯æˆ‘è‡ªå®šä¹‰çš„ä¸€ä¸ªæ–¹æ³•)
 		mTabs.setSelectedTextColor(Color.parseColor("#cc0000"));
-		// È¡Ïûµã»÷TabÊ±µÄ±³¾°É«
+		// å–æ¶ˆç‚¹å‡»Tabæ—¶çš„èƒŒæ™¯è‰²
 		mTabs.setTabBackground(0);
 	}
 
 	private class MyPagerAdapter extends FragmentPagerAdapter {
 
 		private static final String TAG = "MyPagerAdapter";
-		private final String[] titles = { "Ê×Ò³", "²©¿Í×¨À¸", "ÈÈÃÅÎÄÕÂ", "ÎÒµÄ²©¿Í" };
+		private final String[] titles = { "é¦–é¡µ", "åšå®¢ä¸“æ ", "çƒ­é—¨æ–‡ç« ", "æˆ‘çš„åšå®¢" };
 
 		public MyPagerAdapter(FragmentManager fm) {
 			super(fm);
@@ -147,22 +148,22 @@ public class MainActivity extends FragmentActivity implements
 		@Override
 		public Fragment getItem(int position) {
 			switch (position) {
-			case 0: // ÏÔÊ¾²©¿Í×¨¼ÒÒ³Ãæ
+			case 0: // æ˜¾ç¤ºåšå®¢ä¸“å®¶é¡µé¢
 				if (mHPFragment == null) {
 					mHPFragment = new HomePageFragment();
 				}
 				return mHPFragment;
-			case 1: // ÏÔÊ¾ËùÓĞ²©¿Í×¨À¸
+			case 1: // æ˜¾ç¤ºæ‰€æœ‰åšå®¢ä¸“æ 
 				if (mBCSFragment == null) {
 					mBCSFragment = new BlogColumnsFragment();
 				}
 				return mBCSFragment;
-			case 2: // ÏÔÊ¾ÈÈÃÅÎÄÕÂÒ³Ãæ
+			case 2: // æ˜¾ç¤ºçƒ­é—¨æ–‡ç« é¡µé¢
 				if (mHBFragment == null) {
 					mHBFragment = new HotBlogsFragment();
 				}
 				return mHBFragment;
-			case 3: // ÏÔÊ¾ÎÒµÄ²©¿ÍÒ³Ãæ
+			case 3: // æ˜¾ç¤ºæˆ‘çš„åšå®¢é¡µé¢
 				if (mMBFraggment == null) {
 					mMBFraggment = new MyBlogsFragment();
 				}
@@ -203,32 +204,32 @@ public class MainActivity extends FragmentActivity implements
 		return super.onOptionsItemSelected(item);
 	}
 
-	/* ¼àÌıÉè±¸ÎïÀí¼ü£¬×ö³ö·´Ó¦ */
+	/* ç›‘å¬è®¾å¤‡ç‰©ç†é”®ï¼Œåšå‡ºååº” */
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		/*
-		 * keyCode: ±»°´ÏÂµÄ¼üÖµ¼´¼üÅÌÂë event: °´¼üÊÂ¼şµÄ¶ÔÏó£¬ÆäÖĞ°üÀ¨´¥·¢ÊÂ¼şµÄÏêÏ¸ĞÅÏ¢¡£ÈçÊÂ¼ş·¢ÉúÊ±¼äµÈ¡£
+		 * keyCode: è¢«æŒ‰ä¸‹çš„é”®å€¼å³é”®ç›˜ç  event: æŒ‰é”®äº‹ä»¶çš„å¯¹è±¡ï¼Œå…¶ä¸­åŒ…æ‹¬è§¦å‘äº‹ä»¶çš„è¯¦ç»†ä¿¡æ¯ã€‚å¦‚äº‹ä»¶å‘ç”Ÿæ—¶é—´ç­‰ã€‚
 		 */
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			new AlertDialog.Builder(MainActivity.this).setTitle("ÏµÍ³ÌáÊ¾")
-					.setMessage("È·ÈÏÍË³ö³ÌĞò£¿")
-					.setPositiveButton("È·¶¨", new OnClickListener() {
+			new AlertDialog.Builder(MainActivity.this).setTitle("ç³»ç»Ÿæç¤º")
+					.setMessage("ç¡®è®¤é€€å‡ºç¨‹åºï¼Ÿ")
+					.setPositiveButton("ç¡®å®š", new OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
 							finish();
 							android.os.Process.killProcess(android.os.Process
 									.myPid());
 						}
-					}).setNegativeButton("È¡Ïû", null).show();
+					}).setNegativeButton("å–æ¶ˆ", null).show();
 		}
 		return super.onKeyDown(keyCode, event);
-		// false±íÊ¾Î´´¦Àí´ËÊÂ¼ş£¬ËüÓ¦¸Ã¼ÌĞø´«²¥ Ïàµ±ÓÚ return super.
-		// true±íÊ¾´¦ÀíÍê´ËÊÂ¼ş£¬²»»á¼ÌĞø´«²¥
+		// falseè¡¨ç¤ºæœªå¤„ç†æ­¤äº‹ä»¶ï¼Œå®ƒåº”è¯¥ç»§ç»­ä¼ æ’­ ç›¸å½“äº return super.
+		// trueè¡¨ç¤ºå¤„ç†å®Œæ­¤äº‹ä»¶ï¼Œä¸ä¼šç»§ç»­ä¼ æ’­
 	}
 
 	@Override
 	public void onClick(View v) {
 		if (v.getId() == R.id.textView6) {
-			// Æô¶¯ä¯ÀÀÆ÷
+			// å¯åŠ¨æµè§ˆå™¨
 			Intent intent = new Intent();
 			intent.setAction("android.intent.action.VIEW");
 			Uri uri = Uri.parse("http://blog.csdn.net/u012964281");
