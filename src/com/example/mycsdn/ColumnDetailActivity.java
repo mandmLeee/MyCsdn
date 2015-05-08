@@ -3,16 +3,14 @@ package com.example.mycsdn;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import pl.droidsonroids.gif.GifDrawable;
+import pl.droidsonroids.gif.GifImageView;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -21,7 +19,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -31,7 +28,6 @@ import com.model.Blog;
 import com.model.Column;
 import com.utils.HtmlFetchr;
 import com.utils.NetworkState;
-import com.utils.ThumbnailDownloader;
 
 public class ColumnDetailActivity extends Activity implements
 		OnItemClickListener {
@@ -44,7 +40,7 @@ public class ColumnDetailActivity extends Activity implements
 	private TextView mColumnReadNumbText; // 浏览次数
 	private TextView mColumnBlogNumbText; // 文章数量
 	private TextView mColumnBuildDateText; // 创建时间
-	private ImageView mColumnImageView; // 专栏头像
+	private GifImageView mColumnImageView; // 专栏头像
 	private ListView mBlogListView; // 博客列表
 	private View mHeaderView; // listView的头部布局
 	private HtmlFetchr fetchr; // 下载并解析html页面的对象
@@ -73,7 +69,7 @@ public class ColumnDetailActivity extends Activity implements
 				.findViewById(R.id.detail_columnBlogNumbText);
 		mColumnBuildDateText = (TextView) mHeaderView
 				.findViewById(R.id.detail_columnBuildDateText);
-		mColumnImageView = (ImageView) mHeaderView
+		mColumnImageView = (GifImageView) mHeaderView
 				.findViewById(R.id.detail_imageView);
 		mProgressBar = (ProgressBar) findViewById(R.id.ProgressBar_columnDetail);
 		mProgressBar.setVisibility(View.VISIBLE);
@@ -85,10 +81,14 @@ public class ColumnDetailActivity extends Activity implements
 		String imageUrl = mColumn.getImageUrl();
 		mColumnImageView.setTag(imageUrl);
 		Bitmap bitmap = null;
+		GifDrawable gifDrawable = null;
 		if ((bitmap = MainActivity.mThumbnailDownloader.getCacheImage(imageUrl)) != null) {
-			// 如果在缓存中存在
+			// 如果在静态图缓存中存在
 			mColumnImageView.setImageBitmap(bitmap);
-			Log.i(TAG, "image from Cache");
+		} else if ((gifDrawable = MainActivity.mThumbnailDownloader
+				.getGifCacheImage(imageUrl)) != null) {
+			// 如果在动态图缓存中存在
+			mColumnImageView.setImageDrawable(gifDrawable);
 		} else {
 			// 发送下载图片消息
 			Log.i(TAG, "imageUrl:" + imageUrl);
@@ -124,16 +124,25 @@ public class ColumnDetailActivity extends Activity implements
 			@Override
 			protected void onPostExecute(Bundle result) {
 				mProgressBar.setVisibility(View.INVISIBLE);
-				// 更新界面
-				mColumnReadNumbText.setText(result
-						.getString(HtmlFetchr.EXTRA_COLUMN_READ_NUMB));
-				mColumnBlogNumbText.setText(result
-						.getString(HtmlFetchr.EXTRA_COLUMN_BLOG_NUMB));
-				mColumnBuildDateText.setText(result
-						.getString(HtmlFetchr.EXTRA_COLUMN_BUILD_DATE));
-
-				MyAdapter adapter = new MyAdapter(mBlogs);
-				mBlogListView.setAdapter(adapter);
+				if (result == null) { // 访问失败
+					Toast.makeText(ColumnDetailActivity.this, "连接服务器失败",
+							Toast.LENGTH_SHORT).show();
+				} else {
+					// 更新界面
+					mColumnReadNumbText.setText(result
+							.getString(HtmlFetchr.EXTRA_COLUMN_READ_NUMB));
+					mColumnBlogNumbText.setText(result
+							.getString(HtmlFetchr.EXTRA_COLUMN_BLOG_NUMB));
+					mColumnBuildDateText.setText(result
+							.getString(HtmlFetchr.EXTRA_COLUMN_BUILD_DATE));
+				}
+				if (mBlogs == null) {
+					Toast.makeText(ColumnDetailActivity.this, "连接服务器失败",
+							Toast.LENGTH_SHORT).show();
+				} else {
+					MyAdapter adapter = new MyAdapter(mBlogs);
+					mBlogListView.setAdapter(adapter);
+				}
 			}
 		}.execute();
 

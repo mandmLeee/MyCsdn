@@ -14,7 +14,7 @@
         android:paddingRight="6dp"
         android:paddingTop="10dp" >
 
-        <ImageView
+        <pl.droidsonroids.gif.GifImageView
             android:id="@+id/detail_imageView"
             android:layout_width="60dp"
             android:layout_height="60dp"

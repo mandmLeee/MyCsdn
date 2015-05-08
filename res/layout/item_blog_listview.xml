@@ -26,7 +26,7 @@
         android:textColor="#737373"
         android:textSize="14sp" />
 
-    <ImageView
+    <pl.droidsonroids.gif.GifImageView
         android:id="@+id/blogger_iconImageView"
         android:layout_width="40dp"
         android:layout_height="40dp"

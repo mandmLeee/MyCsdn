@@ -3,9 +3,11 @@ package com.example.mycsdn;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -38,6 +40,7 @@ public class ShowBlogFragment extends Fragment implements OnClickListener {
 	private ListView mListView; // 承载页面元素的容器
 	private ProgressBar mProgressBar;
 	private ImageView mBackImageView; // back键
+	private ImageView mSendImageView; // 分享键
 	private MyAdapter mMyAdapter;
 	private HtmlFetchr fetchr;
 
@@ -70,11 +73,15 @@ public class ShowBlogFragment extends Fragment implements OnClickListener {
 			@Override
 			protected void onPostExecute(Void result) {
 				mProgressBar.setVisibility(View.INVISIBLE);
-				mMyAdapter = new MyAdapter(getActivity(), mElements);
-				for (ArticleElement element : mElements) {
-					Log.v(TAG, "element style:" + element.getStyle());
+				if (mElements == null) {
+					Toast.makeText(getActivity(), "连接服务器失败", Toast.LENGTH_SHORT)
+							.show();
+				} else {
+					if (getActivity() != null) {
+						mMyAdapter = new MyAdapter(getActivity(), mElements);
+						mListView.setAdapter(mMyAdapter);
+					}
 				}
-				mListView.setAdapter(mMyAdapter);
 			}
 		}.execute();
 
@@ -98,6 +105,8 @@ public class ShowBlogFragment extends Fragment implements OnClickListener {
 		mListView = (ListView) view.findViewById(R.id.listView_showBlog);
 		mBackImageView = (ImageView) view.findViewById(R.id.back_showblog);
 		mBackImageView.setOnClickListener(this);
+		mSendImageView = (ImageView) view.findViewById(R.id.sendImageView);
+		mSendImageView.setOnClickListener(this);
 		ShowBlog(mBlogUrl); // 获取博客页面
 		return view;
 	}
@@ -120,7 +129,7 @@ public class ShowBlogFragment extends Fragment implements OnClickListener {
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			TextView textView;
-			ImageView imageView;
+			GifImageView imageView;
 			ArticleElement element = mElements.get(position);
 			switch (element.getStyle()) {
 			case ArticleElement.TITLE:
@@ -142,17 +151,22 @@ public class ShowBlogFragment extends Fragment implements OnClickListener {
 			case ArticleElement.IMAGE:
 				convertView = getActivity().getLayoutInflater().inflate(
 						R.layout.article_content_image, null);
-				imageView = (ImageView) convertView
+				imageView = (GifImageView) convertView
 						.findViewById(R.id.article_content_ImageView);
 				// 显示图片
 				final String imageUrl = element.getImageLink();
 				imageView.setTag(imageUrl);
 				// 给imageView设置一个标签，用于存取于Cache和防止图片错位
 				Bitmap bitmap = null;
+				GifDrawable gifDrawable = null;
 				if ((bitmap = MainActivity.mThumbnailDownloader
 						.getCacheImage(imageUrl)) != null) {
-					// 如果在缓存中存在
+					// 如果在静态图缓存中存在
 					imageView.setImageBitmap(bitmap);
+				} else if ((gifDrawable = MainActivity.mThumbnailDownloader
+						.getGifCacheImage(imageUrl)) != null) {
+					// 如果在动态图缓存中存在
+					imageView.setImageDrawable(gifDrawable);
 				} else {
 					// 设置默认头像，在下载完毕前使用此头像占位
 					imageView.setImageResource(R.drawable.ic_default);
@@ -174,7 +188,7 @@ public class ShowBlogFragment extends Fragment implements OnClickListener {
 						.getInstance());
 				textView.setHorizontallyScrolling(true); // 不让超出屏幕的字体自动换行，使用滚动条
 				textView.setFocusable(true);
-				Log.v(TAG, "代码-------------->" + element.getCode());
+				// Log.v(TAG, "代码-------------->" + element.getCode());
 				break;
 			default:
 				break;
@@ -196,7 +210,15 @@ public class ShowBlogFragment extends Fragment implements OnClickListener {
 			} catch (IOException e) {
 			}
 			break;
-
+		case R.id.sendImageView:
+			Intent intent = new Intent(Intent.ACTION_SEND);
+			intent.setType("text/plain");
+			String content = mElements.get(0).getTitle()
+					+ " - 博客频道 - CSDN.NET "+ mBlogUrl;
+			intent.putExtra(Intent.EXTRA_TEXT, content);
+			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			startActivity(Intent.createChooser(intent, "分享"));
+			break;
 		default:
 			break;
 		}

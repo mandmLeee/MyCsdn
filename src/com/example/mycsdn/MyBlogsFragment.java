@@ -81,11 +81,13 @@ public class MyBlogsFragment extends Fragment implements OnItemClickListener,
 			@Override
 			protected void onPostExecute(Void result) {
 				Log.i(TAG, "onPostExecute");
-				mProgressBar.setVisibility(View.INVISIBLE);
-				// 更新ListView
-				adapter = new MyAdapter(mMyBlogs);
-				mMyBlogsListView.setAdapter(adapter);
-				mMyBlogsListView.onRefreshComplete(); // 更新结束
+				if (getActivity() != null) {
+					mProgressBar.setVisibility(View.INVISIBLE);
+					// 更新ListView
+					adapter = new MyAdapter(mMyBlogs);
+					mMyBlogsListView.setAdapter(adapter);
+					mMyBlogsListView.onRefreshComplete(); // 更新结束
+				}
 			}
 		}.execute();
 
@@ -269,7 +271,7 @@ public class MyBlogsFragment extends Fragment implements OnItemClickListener,
 			mMyBlogs.clear();
 			adapter = new MyAdapter(mMyBlogs);
 			mMyBlogsListView.setAdapter(adapter);
-			//显示进度条
+			// 显示进度条
 			mProgressBar.setVisibility(View.VISIBLE);
 			mCurrentPage = 1;
 			mIdString = mIdEditText.getText().toString();

@@ -5,14 +5,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import pl.droidsonroids.gif.GifDrawable;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Movie;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.support.v4.util.LruCache;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 public class ThumbnailDownloader<Token> extends HandlerThread {
 	// Token表示泛型，"类名<泛型>"以保证在类内可以使用Token，就像Token已经是定义好的类一样
@@ -22,10 +26,12 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
 	private Handler mHandler; // 发送下载图片的指令，和处理下载图片的指令的使者
 	private Handler mResponseHandler; // 来自主线程的Handler,更新UI
 	private Listener<Token> mListener;
+	private GifListener<Token> mGifListener;
 	private Map<Token, String> requestMap = Collections
 			.synchronizedMap(new HashMap<Token, String>());
 	// 保存ImageView和URL的键值对，并是线程安全的
-	private LruCache<String, Bitmap> mMemoryCache;
+	private LruCache<String, Bitmap> mMemoryCache; // 缓存静态图
+	private LruCache<String, GifDrawable> mGifMemoryCache; // 缓存动态图
 
 	// 缓存图片的类，当存储图片的大小大于LruCache设定的值，系统自动释放内存
 
@@ -43,15 +49,30 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
 				return value.getRowBytes() * value.getHeight();
 			}
 		};
+		mGifMemoryCache = new LruCache<String, GifDrawable>(mCacheSize) {
+			@Override
+			protected int sizeOf(String key, GifDrawable value) {
+				return (int) value.getAllocationByteCount();// 如果计算GifDrawable的大小呢?shit!
+			}
+		};
 
 	}
 
-	public interface Listener<Token> { // 回调方法，在主线程中实现
+	public interface Listener<Token> { // 更新静态图片的回调接口
 		void onThumbnailDownloaded(Token token, Bitmap thumbnail, String url);
 	}
 
 	public void setListener(Listener<Token> listener) {
 		mListener = listener;
+	}
+
+	public interface GifListener<Token> { // 更新gif图片的回调接口
+		void onThumbnailGifDownloaded(Token token, GifDrawable thumbnail,
+				String url);
+	}
+
+	public void setGifListener(GifListener<Token> listener) {
+		mGifListener = listener;
 	}
 
 	@Override
@@ -78,28 +99,59 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
 	private void handleRequest(final Token token) throws IOException {
 		final String url = requestMap.get(token);
 		final String key = (String) ((ImageView) token).getTag();
-		if (url == null||!key.equals(url))
+		if (url == null || !key.equals(url))
 			return;
 
 		byte[] bitmapBytes = new HtmlFetchr().getUrlBytes(url);
-		// 下载图片
-		final Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapBytes, 0,
+		if (bitmapBytes.length == 0) { // 加载失败
+			// Log.v(TAG, "连接服务器失败");
+			return;
+		}
+
+		// 判断是否是gif图片
+		Movie gifMovie = Movie.decodeByteArray(bitmapBytes, 0,
 				bitmapBytes.length);
-		if (key.equals(url))
-			mMemoryCache.put(key, bitmap); // 存入缓存
+		if (gifMovie != null) {
+		//	Log.v(TAG, "下载的是gif图片");
+			final GifDrawable drawable = new GifDrawable(bitmapBytes);
+			if (key.equals(url) && key != null && drawable != null)
+				mGifMemoryCache.put(key, drawable); // 存入缓存
+			mResponseHandler.post(new Runnable() {
 
-		mResponseHandler.post(new Runnable() {
+				@Override
+				public void run() {
 
-			@Override
-			public void run() {
+					// 更新UI
+					if (requestMap.get(token) != url)
+						return;
+					requestMap.remove(token);
+					mGifListener.onThumbnailGifDownloaded(token, drawable, url);// 更新UI
+				}
+			});
 
-				// 更新UI
-				if (requestMap.get(token) != url)
-					return;
-				requestMap.remove(token);
-				mListener.onThumbnailDownloaded(token, bitmap, url);// 更新UI
-			}
-		});
+		} else {
+			//Log.v(TAG, "下载的是静态图片");
+			// 下载图片
+			final Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapBytes, 0,
+					bitmapBytes.length);
+			if (key.equals(url) && key != null && bitmap != null)
+				mMemoryCache.put(key, bitmap); // 存入缓存
+
+			mResponseHandler.post(new Runnable() {
+
+				@Override
+				public void run() {
+
+					// 更新UI
+					if (requestMap.get(token) != url)
+						return;
+					requestMap.remove(token);
+					mListener.onThumbnailDownloaded(token, bitmap, url);// 更新UI
+				}
+			});
+
+		}
+
 	}
 
 	public void clearQueue() {
@@ -122,9 +174,15 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
 	}
 
 	public Bitmap getCacheImage(String key) {
-		// 获取缓存中的图片
+		// 获取缓存中的静态图片
 		Bitmap bitmap = mMemoryCache.get(key);
 		return bitmap;
+	}
+
+	public GifDrawable getGifCacheImage(String key) {
+		// 获取缓存中的动态图
+		GifDrawable gifDrawable = mGifMemoryCache.get(key);
+		return gifDrawable;
 	}
 
 }

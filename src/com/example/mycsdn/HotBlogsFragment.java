@@ -2,6 +2,8 @@ package com.example.mycsdn;
 
 import java.util.ArrayList;
 
+import pl.droidsonroids.gif.GifDrawable;
+import pl.droidsonroids.gif.GifImageView;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -14,7 +16,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -66,19 +67,27 @@ public class HotBlogsFragment extends Fragment implements OnItemClickListener {
 
 			@Override
 			protected Void doInBackground(Void... params) {
-				mBlogs = fetchr.downloadBlogs(mBlogs, HtmlFetchr.DROP_UPDATE,
-						urlSpec); // 下载博客专栏列表
-				mPages = fetchr.downloadPages();
+				ArrayList<Blog> result = fetchr.downloadBlogs(mBlogs,
+						HtmlFetchr.DROP_UPDATE, urlSpec); // 下载博客专栏列表
+				if (result == null) {
+					Toast.makeText(getActivity(), "连接服务器失败", Toast.LENGTH_SHORT)
+							.show();
+				} else {
+					mBlogs = result;
+					mPages = fetchr.downloadPages();
+				}
 				return null;
 			};
 
 			@Override
 			protected void onPostExecute(Void result) {
-				mProgressBar.setVisibility(View.INVISIBLE);
-				// 更新ListView
-				adapter = new MyAdapter(mBlogs);
-				mHotBlogsListView.setAdapter(adapter);
-				mHotBlogsListView.onRefreshComplete(); // 更新结束
+				if (getActivity() != null) {
+					mProgressBar.setVisibility(View.INVISIBLE);
+					// 更新ListView
+					adapter = new MyAdapter(mBlogs);
+					mHotBlogsListView.setAdapter(adapter);
+					mHotBlogsListView.onRefreshComplete(); // 更新结束
+				}
 			}
 		}.execute();
 
@@ -100,8 +109,13 @@ public class HotBlogsFragment extends Fragment implements OnItemClickListener {
 				ArrayList<Blog> result = new ArrayList<>();
 				result = fetchr.downloadBlogs(result, HtmlFetchr.UP_LOAD,
 						urlSpec); // 下载博客专栏列
-				mBlogs.addAll(result);
-				mPages = fetchr.downloadPages();
+				if (result == null) {
+					Toast.makeText(getActivity(), "连接服务器失败", Toast.LENGTH_SHORT)
+							.show();
+				} else {
+					mBlogs.addAll(result);
+					mPages = fetchr.downloadPages();
+				}
 				return null;
 			};
 
@@ -170,7 +184,7 @@ public class HotBlogsFragment extends Fragment implements OnItemClickListener {
 						.findViewById(R.id.blog_typeTextView);
 				holder.titleText = (TextView) convertView
 						.findViewById(R.id.blog_titleTextView);
-				holder.bloggerIcon = (ImageView) convertView
+				holder.bloggerIcon = (GifImageView) convertView
 						.findViewById(R.id.blogger_iconImageView);
 				holder.contentText = (TextView) convertView
 						.findViewById(R.id.blog_contentTextView);
@@ -194,11 +208,15 @@ public class HotBlogsFragment extends Fragment implements OnItemClickListener {
 			holder.bloggerIcon.setTag(imageUrl);
 			// 给imageView设置一个标签，用于存取于Cache和防止图片错位
 			Bitmap bitmap = null;
+			GifDrawable gifDrawable = null;
 			if ((bitmap = MainActivity.mThumbnailDownloader
 					.getCacheImage(imageUrl)) != null) {
-				// Log.i(TAG, "get image from cache!");
-				// 如果在缓存中存在
+				// 如果在静态图缓存中存在
 				holder.bloggerIcon.setImageBitmap(bitmap);
+			} else if ((gifDrawable = MainActivity.mThumbnailDownloader
+					.getGifCacheImage(imageUrl)) != null) {
+				// 如果在动态图缓存中存在
+				holder.bloggerIcon.setImageDrawable(gifDrawable);
 			} else {
 				// 设置默认头像，在下载完毕前使用此头像占位
 				holder.bloggerIcon.setImageResource(R.drawable.ic_default);
@@ -229,7 +247,7 @@ public class HotBlogsFragment extends Fragment implements OnItemClickListener {
 	private static class ViewHolder {
 		public TextView typeText; // 文章类别
 		public TextView titleText; // 文章标题
-		public ImageView bloggerIcon;// 博主头像
+		public GifImageView bloggerIcon;// 博主头像
 		public TextView contentText; // 文章简介
 		public TextView authorText; // 文章作者
 		public TextView agoText; // 多久之前

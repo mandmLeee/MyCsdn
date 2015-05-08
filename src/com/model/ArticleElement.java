@@ -58,5 +58,5 @@ public class ArticleElement {
 		this.mStyle = this.CODE;
 		this.mCode = mCode;
 	}
-
+	
 }

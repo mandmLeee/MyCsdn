@@ -1,14 +1,14 @@
 package com.example.mycsdn;
 
+import pl.droidsonroids.gif.GifDrawable;
+import pl.droidsonroids.gif.GifImageView;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,11 +25,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.custom.PagerSlidingTabStrip;
 import com.utils.ThumbnailDownloader;
@@ -46,7 +42,7 @@ public class MainActivity extends FragmentActivity implements
 	private HomePageFragment mHPFragment; // 首页
 	private HotBlogsFragment mHBFragment; // 热门文章
 	private MyBlogsFragment mMBFraggment; // 我的博客
-	public static ThumbnailDownloader<ImageView> mThumbnailDownloader; // 图片下载器
+	public static ThumbnailDownloader<GifImageView> mThumbnailDownloader; // 图片下载器
 
 	@SuppressLint("NewApi")
 	@Override
@@ -62,11 +58,12 @@ public class MainActivity extends FragmentActivity implements
 		localTextView.setTextColor(Color.parseColor("#ffffff"));
 
 		// 开启响应下载图片消息的线程
-		mThumbnailDownloader = new ThumbnailDownloader<ImageView>(new Handler());
+		mThumbnailDownloader = new ThumbnailDownloader<GifImageView>(
+				new Handler());
 		mThumbnailDownloader
-				.setListener(new ThumbnailDownloader.Listener<ImageView>() {
+				.setListener(new ThumbnailDownloader.Listener<GifImageView>() {
 					@Override
-					public void onThumbnailDownloaded(ImageView imageView,
+					public void onThumbnailDownloaded(GifImageView imageView,
 							Bitmap thumbnail, String url) {
 						if (imageView.getTag().equals(url)) {
 							// Log.i(TAG, "tag与url对应");
@@ -76,6 +73,23 @@ public class MainActivity extends FragmentActivity implements
 						}
 					}
 				});
+		mThumbnailDownloader
+				.setGifListener(new ThumbnailDownloader.GifListener<GifImageView>() {
+
+					@Override
+					public void onThumbnailGifDownloaded(
+							GifImageView imageView, GifDrawable thumbnail,
+							String url) {
+						if (imageView.getTag().equals(url)) {
+							// Log.i(TAG, "tag与url对应");
+							imageView.setImageDrawable(thumbnail); // 更新UI，上图
+						} else {
+							// Log.i(TAG, "tag与url不对应");
+						}
+					}
+
+				});
+
 		mThumbnailDownloader.start();
 		mThumbnailDownloader.getLooper(); // 必须要在start之后
 		// -----------------------------------
@@ -201,6 +215,8 @@ public class MainActivity extends FragmentActivity implements
 					.setPositiveButton("确定", new OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
 							finish();
+							android.os.Process.killProcess(android.os.Process
+									.myPid());
 						}
 					}).setNegativeButton("取消", null).show();
 		}

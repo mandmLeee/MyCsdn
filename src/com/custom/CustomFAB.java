@@ -1,21 +1,18 @@
 package com.custom;
 
-import com.example.mycsdn.R;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.LinearGradient;
-import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.util.AttributeSet;
 import android.widget.ImageButton;
+
+import com.example.mycsdn.R;
 
 public class CustomFAB extends ImageButton {
 	private Context context;

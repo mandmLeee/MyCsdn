@@ -3,8 +3,8 @@ package com.utils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -14,7 +14,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import android.os.Bundle;
-import android.util.Log;
 
 import com.model.ArticleElement;
 import com.model.Blog;
@@ -38,37 +37,48 @@ public class HtmlFetchr {
 	 * 
 	 * @return 返回为类型byte[]
 	 * */
-	public byte[] getUrlBytes(String urlSpec) throws IOException {
+	public byte[] getUrlBytes(String urlSpec) {
 
-		URL url = new URL(urlSpec);
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		ByteArrayOutputStream out = null;
+		HttpURLConnection conn = null;
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		InputStream in = null;
 		try {
-			out = new ByteArrayOutputStream();
+			URL url = new URL(urlSpec);
+			conn = (HttpURLConnection) url.openConnection();
 			in = conn.getInputStream();
 			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
 				// Log.i(TAG, "连接不成功");
 				return null;
 			}
-
 			byte[] buffer = new byte[1024];
 			int len = 0;
 			while ((len = in.read(buffer)) > 0) {
 				out.write(buffer, 0, len);
 			}
-			out.close();
-			return out.toByteArray();
+
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		} finally {
-			conn.disconnect();
+			if (conn != null)
+				conn.disconnect();
 			if (out != null) {
-				out.close();
+				try {
+					out.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 			if (in != null) {
-				in.close();
+				try {
+					in.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
-
+		return out.toByteArray();
 	}
 
 	/**
@@ -78,11 +88,7 @@ public class HtmlFetchr {
 	 */
 	private String getUrl(String urlSpec) {
 		String result = null;
-		try {
-			result = new String(getUrlBytes(urlSpec));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		result = new String(getUrlBytes(urlSpec));
 		return result;
 	}
 
@@ -93,8 +99,14 @@ public class HtmlFetchr {
 
 		String htmlString = getUrl(urlSpec);
 		ArrayList<ArticleElement> elements = new ArrayList<>();
+		// 如果访问失败
+		if (htmlString.length() == 0) {
+			return null;
+		}
+
 
 		Document doc = Jsoup.parse(htmlString);
+
 		// 标题
 		String title = doc.getElementsByClass("article_title").get(0).text();
 		ArticleElement element = new ArticleElement();
@@ -141,6 +153,7 @@ public class HtmlFetchr {
 			element.setContent(childEle.outerHtml());
 			elements.add(element);
 		}
+
 
 		return elements;
 	}
@@ -191,6 +204,9 @@ public class HtmlFetchr {
 	public ArrayList<Blog> downloadBlogs(ArrayList<Blog> blogs, int code,
 			String urlSpec) {
 		mHtmlString = getUrl(urlSpec);
+		// 如果访问失败
+		if (mHtmlString.length() == 0)
+			return null;
 		// 解析htmlString
 		parserBlogs(blogs, code, mHtmlString);
 		return blogs;
@@ -296,6 +312,9 @@ public class HtmlFetchr {
 	public ArrayList<Column> downloadColumns(ArrayList<Column> columns,
 			int code, String urlSpec) {
 		mHtmlString = getUrl(urlSpec);
+		// 如果访问失败
+		if (mHtmlString.length() == 0)
+			return null;
 		// 解析htmlString
 		parserColumns(columns, code, mHtmlString);
 		return columns;
@@ -381,6 +400,9 @@ public class HtmlFetchr {
 	 */
 	public Bundle downloadColumnInfo(String urlSpec) {
 		String htmlString = getUrl(urlSpec);
+		// 如果访问失败
+		if (htmlString.length() == 0)
+			return null;
 		Bundle result = new Bundle();
 		parserColumnInfo(htmlString, result); // 解析html
 		return result;
@@ -406,6 +428,9 @@ public class HtmlFetchr {
 	public ArrayList<Blog> downloadColumnBlogs(String urlSpec) {
 		ArrayList<Blog> blogs = new ArrayList<Blog>();
 		String htmlString = getUrl(urlSpec);
+		// 如果访问失败
+		if (htmlString.length() == 0)
+			return null;
 		parserColumnBlogs(htmlString, blogs);
 		return blogs;
 	}
@@ -466,6 +491,9 @@ public class HtmlFetchr {
 	public ArrayList<Blog> downloadMyBlogs(ArrayList<Blog> blogs, int code,
 			String urlSpec) {
 		mHtmlString = getUrl(urlSpec);
+		// 如果访问失败
+		if (mHtmlString.length() == 0)
+			return null;
 		// 解析htmlString
 		parserMyBlogs(blogs, code, mHtmlString);
 		return blogs;
